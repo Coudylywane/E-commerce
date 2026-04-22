@@ -17,4 +17,11 @@ public record Money(BigDecimal amount, String currency) {
             throw new InvalidCurrencyException("Currency must be FCFA or EUR");
         }
     }
+    public Money add(Money other) {
+        if (!this.currency.equals(other.currency)) {
+            throw new IllegalArgumentException("Cannot add different currencies");
+        }
+
+        return new Money(this.amount.add(other.amount), this.currency);
+    }
 }
