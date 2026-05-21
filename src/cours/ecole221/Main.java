@@ -5,13 +5,10 @@ import cours.ecole221.models.*;
 import cours.ecole221.record.Money;
 import cours.ecole221.record.PhoneNumber;
 import cours.ecole221.record.SKU;
-import java.util.UUID;
+
+import java.util.*;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -23,113 +20,252 @@ public class Main {
     public static void main(String[] args) {
         System.out.println();
 
-        Account compte1 = new Account(
-                UUID.randomUUID(),
-                new PhoneNumber("771234567"),
-                "XOF"
-        );
+        List<Product> products = new ArrayList<>();
 
-        Account compte2 = new Account(
-                UUID.randomUUID(),
-                new PhoneNumber("+221781112233"),
-                "XOF"
-        );
-
-        compte1.crediter(
+        Product nike = new Product(
+                new SKU("NK-001"),
+                "Nike Air",
+                "Chaussure Nike",
                 new Money(
-                        new BigDecimal("5000"),
+                        new BigDecimal("45000"),
                         "XOF"
-                )
+                ),
+                5
         );
 
-        System.out.println(
-                "Solde compte1 : "
-                        + compte1.balance()
-        );
-
-        // ---------------------------
-        // Transfert valide
-        // ---------------------------
-
-        System.out.println("################### TEST VALIDE #########################");
-
-        compte1.transfererVers(
-                compte2,
+        Product iphone = new Product(
+                new SKU("APL-001"),
+                "iPhone 13",
+                "Téléphone Apple",
                 new Money(
-                        new BigDecimal("2000"),
+                        new BigDecimal("650000"),
                         "XOF"
-                )
+                ),
+                5
         );
 
-        System.out.println(
-                "Solde compte1 après transfert : "
-                        + compte1.balance()
+        Product casque = new Product(
+                new SKU("CSQ-001"),
+                "Casque Bluetooth",
+                "Sony",
+                new Money(
+                        new BigDecimal("25000"),
+                        "XOF"
+                ),
+                5
         );
 
-        System.out.println(
-                "Solde compte2 après transfert : "
-                        + compte2.balance()
-        );
+        products.add(nike);
+        products.add(iphone);
+        products.add(casque);
 
-        // ---------------------------
-        // TEST 1 : montant negatif
-        // ---------------------------
-        System.out.println("################### TEST INVALIDE #########################");
+        // Ajouter du stock
+        nike.addStock(20);
+        iphone.addStock(2);
+        casque.addStock(4);
 
-        try {
+        System.out.println("===== STOCK ACTUEL APRES AJOUT =====");
 
-            Money negatif = new Money(
-                    new BigDecimal("-1000"),
-                    "XOF"
-            );
+        for(Product product : products) {
 
-        } catch (Exception e) {
             System.out.println(
-                    "Erreur montant négatif : "
-                            + e.getMessage()
+                    product.getName()
+                            + " -> "
+                            + product.getQuantityInStock()
             );
         }
 
-        // ---------------------------
-        // TEST 2 : devises différentes
-        // ---------------------------
+        // Vente
+        nike.removeStock(7);
 
-        try {
-            compte1.crediter(
-                    new Money(
-                            new BigDecimal("100"),
-                            "EUR"
-                    )
-            );
+        System.out.println("===== STOCK ACTUEL APRES VENTE =====");
 
-        } catch (Exception e) {
+        for(Product product : products) {
+
             System.out.println(
-                    "Erreur devise : "
-                            + e.getMessage()
+                    product.getName()
+                            + " -> "
+                            + product.getQuantityInStock()
             );
         }
 
-        // ---------------------------
-        // TEST 3 : dépassement du solde
-        // ---------------------------
+        // ===================================
+        // TEST INVARIANCE STOCK
+        // ===================================
+
+        System.out.println("\n===== TEST  =====");
 
         try {
 
-            compte1.debiter(
-                    new Money(
-                            new BigDecimal("999999"),
-                            "XOF"
-                    )
-            );
+            casque.removeStock(10);
 
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
 
             System.out.println(
-                    "Erreur solde : "
-                            + e.getMessage()
+                    "Erreur : " + e.getMessage()
             );
+        }
+
+        // ===================================
+        // ALERTES REAPPROVISIONNEMENT
+        // ===================================
+
+        System.out.println(
+                "\n===== PRODUITS A REAPPROVISIONNER ====="
+        );
+
+        for(Product product : products) {
+
+            if(product.needsRestock()) {
+
+                System.out.println(
+                        product.getName()
+                                + " stock faible : "
+                                + product.getQuantityInStock()
+                );
+            }
         }
     }
+
+
+//                Product tshirt = new Product(
+//                        new SKU("TSHIRT-001"),
+//                        "T-Shirt Nike",
+//                        "T-shirt noir",
+//                        new Money(new BigDecimal("15000"), "XOF"),
+//                        5
+//                );
+//
+//                // Ajout de stock
+//                tshirt.addStock(10);
+//
+//                System.out.println("Stock actuel : "
+//                        + tshirt.getQuantityInStock());
+//
+//                // Vente
+//                tshirt.removeStock(3);
+//
+//                System.out.println("Stock après vente : "
+//                        + tshirt.getQuantityInStock());
+//
+//                // Vérification réapprovisionnement
+//                System.out.println(
+//                        "Besoin de réapprovisionnement ? "
+//                                + tshirt.needsRestock()
+//                );
+//
+//                // Cas invalide
+//                tshirt.removeStock(20);
+//            }
+
+
+//        Account compte1 = new Account(
+//                UUID.randomUUID(),
+//                new PhoneNumber("771234567"),
+//                "XOF"
+//        );
+//
+//        Account compte2 = new Account(
+//                UUID.randomUUID(),
+//                new PhoneNumber("+221781112233"),
+//                "XOF"
+//        );
+//
+//        compte1.crediter(
+//                new Money(
+//                        new BigDecimal("5000"),
+//                        "XOF"
+//                )
+//        );
+//
+//        System.out.println(
+//                "Solde compte1 : "
+//                        + compte1.balance()
+//        );
+//
+//        // ---------------------------
+//        // Transfert valide
+//        // ---------------------------
+//
+//        System.out.println("################### TEST VALIDE #########################");
+//
+//        compte1.transfererVers(
+//                compte2,
+//                new Money(
+//                        new BigDecimal("2000"),
+//                        "XOF"
+//                )
+//        );
+//
+//        System.out.println(
+//                "Solde compte1 après transfert : "
+//                        + compte1.balance()
+//        );
+//
+//        System.out.println(
+//                "Solde compte2 après transfert : "
+//                        + compte2.balance()
+//        );
+//
+//        // ---------------------------
+//        // TEST 1 : montant negatif
+//        // ---------------------------
+//        System.out.println("################### TEST INVALIDE #########################");
+//
+//        try {
+//
+//            Money negatif = new Money(
+//                    new BigDecimal("-1000"),
+//                    "XOF"
+//            );
+//
+//        } catch (Exception e) {
+//            System.out.println(
+//                    "Erreur montant négatif : "
+//                            + e.getMessage()
+//            );
+//        }
+//
+//        // ---------------------------
+//        // TEST 2 : devises différentes
+//        // ---------------------------
+//
+//        try {
+//            compte1.crediter(
+//                    new Money(
+//                            new BigDecimal("100"),
+//                            "EUR"
+//                    )
+//            );
+//
+//        } catch (Exception e) {
+//            System.out.println(
+//                    "Erreur devise : "
+//                            + e.getMessage()
+//            );
+//        }
+//
+//        // ---------------------------
+//        // TEST 3 : dépassement du solde
+//        // ---------------------------
+//
+//        try {
+//
+//            compte1.debiter(
+//                    new Money(
+//                            new BigDecimal("999999"),
+//                            "XOF"
+//                    )
+//            );
+//
+//        } catch (Exception e) {
+//
+//            System.out.println(
+//                    "Erreur solde : "
+//                            + e.getMessage()
+//            );
+//        }
+//    }
 
 
 

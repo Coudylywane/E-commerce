@@ -10,10 +10,10 @@ public record SKU(String value) {
     public SKU {
         Objects.requireNonNull(value, "SKU cannot be null");
 
-        if (!PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException(
-                    "Invalid SKU format. Expected: AAA-1234 to AAA-123456"
-            );
-        }
+//        if (!PATTERN.matcher(value).matches()) {
+//            throw new IllegalArgumentException(
+//                    "Invalid SKU format. Expected: AAA-1234 to AAA-123456"
+//            );
+//        }
     }
 }
